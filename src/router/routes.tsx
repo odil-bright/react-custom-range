@@ -1,7 +1,7 @@
 import { redirect } from "react-router-dom";
-import { RouteNames } from "../models/router";
-import Exercise1 from "../pages/Exercise1";
-import Exercise2 from "../pages/Exercise2";
+import { RouteNames } from "@/models/router";
+import Exercise1 from "@/pages/Exercise1";
+import Exercise2 from "@/pages/Exercise2";
 
 const routes = [
   {

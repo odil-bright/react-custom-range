@@ -4,7 +4,7 @@ const Exercise1 = () => {
   return (
     <>
       <h1>Exercise1</h1>
-      <Range />
+      <Range min={0} max={10000} />
     </>
   );
 };
