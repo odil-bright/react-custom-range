@@ -1,64 +1,53 @@
-import { useEffect, useRef, useState } from "react";
-import Knob from "./Knob";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { InputLabel } from "./InputLabel";
+import Slider from "./Slider";
 
-interface RangeProps {
+export interface RangeProps {
   min?: number;
   max?: number;
   steps?: number[];
 }
 
+export interface RangeState {
+  min: number;
+  max: number;
+}
+
+export interface RangeChildrenProps {
+  setState: Dispatch<SetStateAction<RangeState>>;
+  state: RangeState;
+  isMin?: boolean;
+  toEdit?: boolean;
+  slider?: React.MutableRefObject<any>;
+  dimensions?: { width: number; height: number };
+}
+
 export default function Range({ min, max, steps }: RangeProps) {
-  const [minVal, setMinVal] = useState();
-  const [maxVal, setMaxVal] = useState();
-  const [state, setState] = useState({ min: min, max: max });
-
-  const sliderRef = useRef(null);
-
-  const handlers = {
-    onChange: (ev: React.ChangeEvent<HTMLInputElement>) => {},
-  };
+  const [state, setState] = useState<RangeState>({ min, max });
 
   return (
-    <div style={{ display: "flex", alignItems: "center" }}>
-      <input
-        type="number"
-        value={state.min}
-        style={{ width: "3rem" }}
-        onChange={(ev) => {
-          const value = Number(ev.target.value);
-          if (value < min || value > state.max) return;
-          setState((state) => ({ ...state, min: value }));
-        }}
+    <div className="range">
+      <InputLabel
+        setState={setState}
+        state={state}
+        min={min}
+        max={max}
+        isMin={true}
+        toEdit={!steps}
       />
-      <div className="slider" ref={sliderRef}>
-        <div className="slider__first" />
-        <Knob
-          slider={sliderRef}
-          state={state}
-          max={max}
-          min={min}
-          setValue={setState}
-          isMin={true}
-          steps={steps}
-        />
-        <Knob
-          slider={sliderRef}
-          state={state}
-          max={max}
-          min={min}
-          setValue={setState}
-          steps={steps}
-        />
-      </div>
-      <input
-        type="number"
-        value={state.max}
-        style={{ width: "3rem" }}
-        onChange={(ev) => {
-          const value = Number(ev.target.value);
-          if (value > max || value < state.min) return;
-          setState((state) => ({ ...state, max: value }));
-        }}
+      <Slider
+        steps={steps}
+        setState={setState}
+        state={state}
+        min={min}
+        max={max}
+      />
+      <InputLabel
+        setState={setState}
+        state={state}
+        min={min}
+        max={max}
+        toEdit={!steps}
       />
     </div>
   );

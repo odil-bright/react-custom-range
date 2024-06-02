@@ -1,22 +1,7 @@
-import { mapRangeValue } from "@/common/utils";
-import {
-  Dispatch,
-  MutableRefObject,
-  SetStateAction,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-
-interface KnobProps {
-  slider: MutableRefObject<any>;
-  setValue: Dispatch<SetStateAction<{ min: number; max: number }>>;
-  state: { min: number; max: number };
-  min?: number;
-  max?: number;
-  isMin?: boolean;
-  steps?: number[];
-}
+import { getClosestStep, mapRangeValue } from "@/common/utils";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { RangeChildrenProps, RangeProps } from "./Range";
+import { debounce } from "lodash";
 
 export default function Knob({
   isMin = false,
@@ -24,39 +9,23 @@ export default function Knob({
   max,
   state,
   slider,
-  setValue,
+  setState,
   steps,
-}: KnobProps) {
+}: RangeProps & RangeChildrenProps) {
   const [isDragging, setIsDragging] = useState(false);
-  const [hasRun, setHasRun] = useState(false);
   const knob = useRef(null);
-
-  const handlers = {
-    onMouseMove: (ev: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-      if (!isDragging) return;
-      const value = utils.getRangeValue(ev.pageX);
-      if ((isMin && value > state.max) || (!isMin && value < state.min)) return;
-      if (!steps) {
-        knob.current.style.left = utils.getXPos(ev.pageX) + "px";
-        utils.setValue(value);
-      } else {
-        knob.current.style.left = utils.getXPos(ev.pageX) + "px";
-        const step = utils.getStep();
-        if (hasRun) utils.setValue(steps[step]);
-      }
-    },
-  };
+  const currentStep = useRef(null);
 
   const utils = {
-    setValue: (value: number) => {
-      if (isMin) {
-        setValue((state) => ({ ...state, min: value }));
-      } else setValue((state) => ({ ...state, max: value }));
-    },
-    getRangeValue: (currentPos: number | void) => {
-      if (!currentPos) return;
-      return utils.getValueFromXPos(currentPos);
-    },
+    setValue: useCallback(
+      debounce((value: number) => {
+        if (isNaN(value)) return;
+        if (isMin) {
+          setState((state) => ({ ...state, min: value }));
+        } else setState((state) => ({ ...state, max: value }));
+      }, 10),
+      [isMin, setState]
+    ),
     getValueFromXPos: (currentPos: number) => {
       const sliderBoundingClientRect = slider.current?.getBoundingClientRect();
       const currentRangeMin = sliderBoundingClientRect.left;
@@ -66,15 +35,14 @@ export default function Knob({
         { min: currentRangeMin, max: currentRangeMax },
         { min, max }
       );
-      return value <= max ? Math.round(value) : max;
+      return Math.round(value);
     },
-    getXPosFromValue: () => {
+    getXPosFromValue: (value = isMin ? state.min : state.max) => {
       const sliderBoundingClientRect = slider.current?.getBoundingClientRect();
       const currentRangeMin = 0;
       const currentRangeMax =
         sliderBoundingClientRect.width -
         knob.current.getBoundingClientRect().width;
-      const value = isMin ? state.min : state.max;
       const xPos = mapRangeValue(
         value,
         { min, max },
@@ -97,50 +65,97 @@ export default function Knob({
         return xPos;
       }
     },
-    getStep() {
+    getStep(xPos: number) {
       const knobBoundingClientRect = knob.current.getBoundingClientRect();
       const sliderBoundingClientRect = slider.current.getBoundingClientRect();
-      const knobXPos = knobBoundingClientRect.x - sliderBoundingClientRect.left;
-
-      if (knobXPos + 5 < utils.getXPosFromValue()) {
-        const currentStepIndex = steps.findIndex((st) => {
-          return st == (isMin ? state.min : state.max);
-        });
-        setHasRun(true);
-        return currentStepIndex - 1 < 0 ? 0 : currentStepIndex - 1;
-      } else if (knobXPos - 5 > utils.getXPosFromValue()) {
-        const currentStepIndex = steps.findIndex((st) => {
-          return st == (isMin ? state.min : state.max);
-        });
-        setHasRun(true);
-        return currentStepIndex + 1 > steps.length - 1
-          ? steps.length
-          : currentStepIndex + 1;
+      const step = getClosestStep(
+        xPos,
+        sliderBoundingClientRect.width,
+        steps.length - 1
+      );
+      if (!isMin && step.index === steps.length - 1) {
+        step.point -= knobBoundingClientRect.width / 2;
       }
+      return step;
+    },
+    isInvalidValue: (value: number) => {
+      if (isMin) {
+        return value < min || value > state.max;
+      } else {
+        return value > max || value < state.min;
+      }
+    },
+    setStepPoint(point: number) {
+      if (isNaN(point)) return;
+      knob.current.style.transition = "left 0.05s";
+      knob.current.style.left = `${point}px`;
+    },
+  };
+
+  const handlers = {
+    onMove: useCallback(
+      (currentXPos: number) => {
+        if (!isDragging) return;
+        if (!steps) {
+          const value = utils.getValueFromXPos(currentXPos);
+          if (utils.isInvalidValue(value)) return;
+          knob.current.style.left = utils.getXPos(currentXPos) + "px";
+          utils.setValue(value);
+        } else {
+          const step = utils.getStep(Number(utils.getXPos(currentXPos)));
+          const stepVal = steps[step.index];
+          if (utils.isInvalidValue(stepVal)) return;
+
+          knob.current.style.left = `${utils.getXPos(currentXPos)}px`;
+          currentStep.current = step;
+
+          if (stepVal !== (isMin ? state.min : state.max)) {
+            utils.setValue(stepVal);
+            utils.setStepPoint(step.point);
+          }
+        }
+      },
+      [isDragging, isMin, state.min, state.max, steps, utils.setValue]
+    ),
+    onStart: () => {
+      knob.current.style.zIndex = 1;
+      setIsDragging(true);
+    },
+    onLeave: () => {
+      knob.current.style.zIndex = 0;
+      if (steps && currentStep.current) {
+        utils.setStepPoint(currentStep.current.point);
+      }
+      setIsDragging(false);
     },
   };
 
   useEffect(() => {
-    if (isDragging && !steps) return;
-    knob.current.style.left = utils.getXPosFromValue() + "px";
-    if (steps) {
-      setHasRun(false);
+    if (!isDragging && !steps) {
+      knob.current.style.left = `${utils.getXPosFromValue()}px`;
     }
   }, [knob, state]);
 
+  useEffect(() => {
+    if (steps && slider) {
+      const { width } = slider.current.getBoundingClientRect();
+      knob.current.style.left = `${utils.getStep(isMin ? 0 : width).point}px`;
+    }
+  }, []);
+
   return (
-    <div
-      className="slider__knob"
+    <button
+      className="range__slider__knob"
       ref={knob}
-      onMouseMove={handlers.onMouseMove}
-      onMouseDown={() => {
-        knob.current.style.zIndex = 1;
-        setIsDragging(true);
-      }}
-      onMouseUp={() => setIsDragging(false)}
-      onMouseLeave={() => {
-        knob.current.style.zIndex = 0;
-        setIsDragging(false);
+      onMouseMove={(ev) => handlers.onMove(ev.pageX)}
+      onMouseDown={handlers.onStart}
+      onMouseUp={handlers.onLeave}
+      onMouseLeave={handlers.onLeave}
+      onTouchStart={handlers.onStart}
+      onTouchMove={(ev) => handlers.onMove(ev.touches[0].clientX)}
+      onTouchEnd={handlers.onLeave}
+      onTransitionEnd={(ev) => {
+        knob.current.style.transitionProperty = "none";
       }}
     />
   );

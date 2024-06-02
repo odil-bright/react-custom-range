@@ -1,50 +1,8 @@
 @import "./assets/sass/variables.scss";
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,100..900;1,100..900&display=swap");
+@import "./assets/sass/components/range.scss";
 
-h1 {
-  color: red;
-}
-
-.slider {
-  align-items: center;
-  display: flex;
-  height: 1rem;
-  width: 16rem;
-  margin: 1rem;
-  position: relative;
-  &__first {
-    background-color: $c-black;
-    height: 0.25rem;
-    width: 100%;
-    border-radius: 3px;
-  }
-  &__knob {
-    height: 0.8rem;
-    width: 0.8rem;
-    border-radius: 100%;
-    background-color: $c-black;
-    cursor: move;
-    user-select: none;
-    touch-action: none;
-    position: absolute;
-    &:hover {
-      height: 1rem;
-      width: 1rem;
-    }
-  }
-  &__second {
-    background-color: rgb(203 213 225);
-    flex: 1;
-    height: 0.3rem;
-  }
-}
-
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-/* Firefox */
-input[type="number"] {
-  -moz-appearance: textfield;
+* {
+  font-family: "Notos", sans-serif;
+  color: $c-black;
 }

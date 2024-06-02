@@ -6,7 +6,7 @@ const Exercise2 = () => {
 
   return (
     <>
-      <h1>Exercise2</h1>
+      <h1>Exercise two</h1>
       {steps && (
         <Range min={steps[0]} max={steps[steps.length - 1]} steps={steps} />
       )}

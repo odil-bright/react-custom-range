@@ -17,7 +17,7 @@ const Exercise1 = () => {
 
   return (
     <>
-      <h1>Exercise 1</h1>
+      <h1>Exercise one</h1>
       {data && <Range min={data[0]} max={data[1]} />}
     </>
   );
