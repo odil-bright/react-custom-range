@@ -146,6 +146,7 @@ export default function Knob({
   return (
     <button
       className="range__slider__knob"
+      aria-label={`range button ${isMin ? "min" : "max"}`}
       ref={knob}
       onMouseMove={(ev) => handlers.onMove(ev.pageX)}
       onMouseDown={handlers.onStart}

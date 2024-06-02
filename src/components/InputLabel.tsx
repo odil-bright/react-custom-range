@@ -37,6 +37,7 @@ export function InputLabel({
       {toEdit && editing ? (
         <input
           type="number"
+          aria-label={`label inputs ${isMin ? "min" : "max"}`}
           value={currentValue}
           onChange={(ev) => {
             setCurrentValue(Number(ev.target.value));
@@ -54,7 +55,11 @@ export function InputLabel({
           }}
         />
       ) : (
-        <button onClick={() => setEditing(!editing)} disabled={!toEdit}>
+        <button
+          onClick={() => setEditing(!editing)}
+          disabled={!toEdit}
+          aria-label={`label button ${isMin ? "min" : "max"}`}
+        >
           <p>{isMin ? state.min : state.max}€</p>
         </button>
       )}

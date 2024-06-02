@@ -16,6 +16,7 @@ export default function Slider({
       <div className="range__slider__bar" />
       <Knob
         slider={sliderRef}
+        aria-label="range button min"
         state={state}
         max={max}
         min={min}
@@ -26,6 +27,7 @@ export default function Slider({
       />
       <Knob
         slider={sliderRef}
+        aria-label="range button max"
         state={state}
         max={max}
         min={min}

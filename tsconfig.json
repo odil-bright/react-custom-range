@@ -10,6 +10,8 @@
     "module": "ESNext",
     "skipLibCheck": true,
     "outDir": "./dist",
+    "esModuleInterop": true,
+    "types": ["node", "jest"],
 
     /* Bundler mode */
     "moduleResolution": "bundler",
