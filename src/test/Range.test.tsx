@@ -1,8 +1,6 @@
 import Range, { RangeProps } from "@/components/Range";
 import { render, screen, waitFor } from "@testing-library/react";
 
-import React from "react";
-
 describe("Range component", () => {
   const props: RangeProps = {
     max: 10000,

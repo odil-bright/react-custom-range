@@ -1,4 +1,8 @@
-import { getClosestStep, mapRangeValue } from "@/common/utils";
+import {
+  divideLineIntoEqualSegments,
+  getClosestStep,
+  mapRangeValue,
+} from "@/common/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { RangeChildrenProps, RangeProps } from "./Range";
 import { debounce } from "lodash";
@@ -15,6 +19,17 @@ export default function Knob({
   const [isDragging, setIsDragging] = useState(false);
   const knob = useRef(null);
   const currentStep = useRef(null);
+  const [wWidth, setWWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWWidth(window.innerWidth);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   const utils = {
     setValue: useCallback(
@@ -134,14 +149,20 @@ export default function Knob({
     if (!isDragging && !steps) {
       knob.current.style.left = `${utils.getXPosFromValue()}px`;
     }
-  }, [knob, state]);
+  }, [knob, state, wWidth]);
 
   useEffect(() => {
     if (steps && slider) {
       const { width } = slider.current.getBoundingClientRect();
-      knob.current.style.left = `${utils.getStep(isMin ? 0 : width).point}px`;
+      if (currentStep.current?.point) {
+        const stepPoints = divideLineIntoEqualSegments(steps.length - 1, width);
+        const currentStepPoint = stepPoints[currentStep.current.index];
+        knob.current.style.left = `${currentStepPoint}px`;
+      } else {
+        knob.current.style.left = `${utils.getStep(isMin ? 0 : width).point}px`;
+      }
     }
-  }, []);
+  }, [wWidth]);
 
   return (
     <button
@@ -155,7 +176,7 @@ export default function Knob({
       onTouchStart={handlers.onStart}
       onTouchMove={(ev) => handlers.onMove(ev.touches[0].clientX)}
       onTouchEnd={handlers.onLeave}
-      onTransitionEnd={(ev) => {
+      onTransitionEnd={() => {
         knob.current.style.transitionProperty = "none";
       }}
     />

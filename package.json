@@ -6,13 +6,16 @@
   "scripts": {
     "serve": "webpack serve --mode development",
     "build": "webpack --mode production",
-    "test": "jest",
-    "coverage": "jest --coverage",
+    "test": "jest  --watch",
+    "coverage": "jest --coverage --no-cache",
     "jest-clear": "jest --clearCache"
   },
   "keywords": [],
-  "author": "",
+  "author": "Odil Bright",
   "license": "ISC",
+  "engines": {
+    "node": ">=18.18.0 <19.0.0"
+  },
   "dependencies": {
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
