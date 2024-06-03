@@ -4,7 +4,7 @@ import Exercise1 from "@/pages/Exercise1";
 import Exercise2 from "@/pages/Exercise2";
 import { getPriceSteps } from "@/services/priceData";
 import ErrorPage from "@/pages/ErrorPage";
-import Layout from "@/assets/layouts/Layout";
+import Layout from "@/layouts/Layout";
 
 const routes: RouteObject[] = [
   {
