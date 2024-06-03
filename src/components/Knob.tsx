@@ -1,11 +1,7 @@
-import {
-  divideLineIntoEqualSegments,
-  getClosestStep,
-  mapRangeValue,
-} from "@/common/utils";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { RangeChildrenProps, RangeProps } from "./Range";
 import { debounce } from "lodash";
+import RangeCalculationsContext from "@/context/RangeCalculationsContext";
 
 export default function Knob({
   isMin = false,
@@ -19,6 +15,7 @@ export default function Knob({
   const [isDragging, setIsDragging] = useState(false);
   const knob = useRef(null);
   const currentStep = useRef(null);
+  const { handlers: calculations } = useContext(RangeCalculationsContext);
   const [wWidth, setWWidth] = useState(window.innerWidth);
 
   useEffect(() => {
@@ -45,7 +42,7 @@ export default function Knob({
       const sliderBoundingClientRect = slider.current?.getBoundingClientRect();
       const currentRangeMin = sliderBoundingClientRect.left;
       const currentRangeMax = sliderBoundingClientRect.right;
-      const value = mapRangeValue(
+      const value = calculations.mapRangeValue(
         currentPos,
         { min: currentRangeMin, max: currentRangeMax },
         { min, max }
@@ -58,7 +55,7 @@ export default function Knob({
       const currentRangeMax =
         sliderBoundingClientRect.width -
         knob.current.getBoundingClientRect().width;
-      const xPos = mapRangeValue(
+      const xPos = calculations.mapRangeValue(
         value,
         { min, max },
         { min: currentRangeMin, max: currentRangeMax }
@@ -83,7 +80,7 @@ export default function Knob({
     getStep(xPos: number) {
       const knobBoundingClientRect = knob.current.getBoundingClientRect();
       const sliderBoundingClientRect = slider.current.getBoundingClientRect();
-      const step = getClosestStep(
+      const step = calculations.getClosestStep(
         xPos,
         sliderBoundingClientRect.width,
         steps.length - 1
@@ -155,7 +152,10 @@ export default function Knob({
     if (steps && slider) {
       const { width } = slider.current.getBoundingClientRect();
       if (currentStep.current?.point) {
-        const stepPoints = divideLineIntoEqualSegments(steps.length - 1, width);
+        const stepPoints = calculations.divideLineIntoEqualSegments(
+          steps.length - 1,
+          width
+        );
         const currentStepPoint = stepPoints[currentStep.current.index];
         knob.current.style.left = `${currentStepPoint}px`;
       } else {

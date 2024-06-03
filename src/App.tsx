@@ -1,8 +1,13 @@
-import React from "react";
 import { RouterProvider } from "react-router-dom";
 import router from "./router/router";
+import { apiOperations } from "./services/priceData";
+import { ApiOperationsProvider } from "./context/ApiOperationsContext";
 const App = () => {
-  return <RouterProvider router={router} />;
+  return (
+    <ApiOperationsProvider operations={apiOperations}>
+      <RouterProvider router={router} />
+    </ApiOperationsProvider>
+  );
 };
 
 export default App;

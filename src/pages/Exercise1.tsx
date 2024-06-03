@@ -1,12 +1,14 @@
 import Range from "@/components/Range";
+import ApiOperationsContext from "@/context/ApiOperationsContext";
 import { getPriceRange } from "@/services/priceData";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 const Exercise1 = () => {
   const [data, setData] = useState();
+  const { operations } = useContext(ApiOperationsContext);
 
   useEffect(() => {
-    getPriceRange().then((result) => {
+    operations.getPriceRange().then((result) => {
       if (result && result.range) {
         setData(result.range);
       } else {
