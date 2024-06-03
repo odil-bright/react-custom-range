@@ -1,5 +1,5 @@
 import { apiGet } from "@/api/api";
-import { ApiOperations } from "@/context/ApiContext";
+import { ApiOperations } from "@/context/ApiOperationsContext";
 import { endpoints } from "@/models/api";
 
 export const apiOperations: ApiOperations = {
