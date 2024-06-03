@@ -10,6 +10,7 @@ export interface RangeProps {
   steps?: number[];
 }
 
+// TODO: RangeStateContext
 export interface RangeState {
   min: number;
   max: number;
