@@ -1,7 +1,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { RouterProvider, createMemoryRouter } from "react-router-dom";
 import routes from "@/router/routes";
-import ApiOperationsContext, {
+import {
   ApiOperations,
   ApiOperationsProvider,
 } from "@/context/ApiOperationsContext";
@@ -25,6 +25,6 @@ describe("RouterProvider test", () => {
         <RouterProvider router={router} />
       </ApiOperationsProvider>
     );
-    expect(await screen.findByText("Exercise one")).toBeDefined();
+    expect(await screen.findByText("Linear Range")).toBeDefined();
   });
 });
